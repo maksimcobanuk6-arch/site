@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberStyle | Premium System</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;500;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div id="login-modal" class="modal-overlay">
+    <div class="modal-box admin-login-card">
+        <span class="close-btn" onclick="toggleModal('login-modal', false)">×</span>
+        
+        <div class="login-header">
+            <i class="fas fa-user-shield"></i>
+            <h3>Staff Authentication</h3>
+            <p>Вхід в систему керування BarberStyle</p>
+        </div>
+
+        <div class="login-body">
+            <div class="auth-input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="admin-pass" placeholder="Введіть код доступу">
+            </div>
+            
+            <button class="btn login-submit-btn" onclick="login()">
+                <span>Увійти в панель</span>
+                <i class="fas fa-sign-in-alt"></i>
+            </button>
+            
+            <p class="hint">Підказка: <span>adm</span></p>
+        </div>
+    </div>
+</div>
+
+<header>
+    <div class="logo" onclick="goHome()"><i class="fas fa-cut"></i> BARBERSTYLE</div>
+    <div class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></div>
+    <nav>
+        <ul id="nav-list">
+            <li><a href="#services" onclick="toggleMenu()">Послуги</a></li>
+            <li><a href="#catalog" onclick="toggleMenu()">Каталог</a></li>
+            <li><a href="#team" onclick="toggleMenu()">Команда</a></li>
+            <li><a href="#reviews" onclick="toggleMenu()">Відгуки</a></li>
+            <li><a href="#contact" onclick="toggleMenu()">Запис</a></li>
+            <li><button class="admin-trigger" onclick="toggleModal('login-modal', true)"><i class="fas fa-user-lock"></i> Staff</button></li>
+        </ul>
+    </nav>
+</header>
+
+<div id="client-view">
+    
+    <section class="hero">
+        <div class="hero-content">
+            <p class="subtitle">EST. 2026</p>
+            <h1>BARBER<span style="color:white">STYLE</span></h1>
+            <h2>Твій стиль — твоя зброя</h2>  
+            <a href="#contact" class="btn hero-btn">Записатися Онлайн</a>
+        </div>
+    </section>
+
+    <section id="services">
+        <h2 class="section-title">Оберіть послугу</h2>
+        <div class="grid">
+            <div class="card" onclick="selectService('Стрижка')">
+                <span class="card-price">500 ₴</span>
+                <i class="fas fa-scissors"></i>
+                <h3>Стрижка</h3>
+                <p>Класика та фейд</p>
+            </div>
+            <div class="card" onclick="selectService('Борода')">
+                <span class="card-price">350 ₴</span>
+                <i class="fas fa-beard"></i>
+                <h3>Борода</h3>
+                <p>Королівський догляд</p>
+            </div>
+            <div class="card" onclick="selectService('Комплекс')">
+                <span class="card-price">750 ₴</span>
+                <i class="fas fa-user-tie"></i>
+                <h3>Комплекс</h3>
+                <p>Все включено</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="catalog">
+        <h2 class="section-title">Популярні Стилі</h2>
+        <div class="grid">
+            <div class="style-card">
+                <img src="https://cdn.shopify.com/s/files/1/0029/0868/4397/files/Textured-French-Crop.webp?v=1755076415" alt="Crop">
+                <div class="style-info">
+                    <h3>CROP (КРОП)</h3>
+                    <p>Текстурний верх та ідеальний перехід.</p>
+                </div>
+            </div>
+            <div class="style-card">
+                <img src="https://images.unsplash.com/photo-1593702288056-7927b442d0fa?auto=format&fit=crop&w=800&q=80" alt="Pompadour">
+                <div class="style-info">
+                    <h3>POMPADOUR</h3>
+                    <p>Класичний об'єм та елегантність.</p>
+                </div>
+            </div>
+            <div class="style-card">
+                <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=800&q=80" alt="Undercut">
+                <div class="style-info">
+                    <h3>UNDERCUT</h3>
+                    <p>Стильний контраст довжини.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="team">
+        <h2 class="section-title">Команда</h2>
+        <div class="grid">
+            <div class="card" onclick="selectBarber('Rostislav')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Albert_Einstein_Head_cleaned.jpg/960px-Albert_Einstein_Head_cleaned.jpg" class="barber-img" alt="Barber">
+                <h3>Rostislav</h3>
+                <p class="barber-rank">Top Barber</p>
+                <button class="btn sm-btn">Обрати</button>
+            </div>
+            <div class="card" onclick="selectBarber('Yurik')">
+                <img src="https://th.bing.com/th/id/OIP.Rt8FqEicCRDJpkq_mTUpRgHaNK?w=115&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3" class="barber-img" alt="Barber">
+                <h3>Yuriy Tuzoloh</h3>
+                <p class="barber-rank">Senior Barber</p>
+                <button class="btn sm-btn">Обрати</button>
+            </div>
+            <div class="card" onclick="selectBarber('Opap')">
+                <img src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="barber-img" alt="Barber">
+                <h3>Opap</h3>
+                <p class="barber-rank">Junior Barber</p>
+                <button class="btn sm-btn">Обрати</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="reviews" style="background: #181818;">
+        <h2 class="section-title">Відгуки</h2>
+        <div id="reviews-container"style="margin-bottom: 40px;"></div>
+        
+        <div class="form-box">
+            <h3 style="margin-bottom: 15px;">Залишити відгук</h3>
+            <form onsubmit="addReview(event)">
+                <input type="text" id="review-name" placeholder="Ваше Ім'я" required>
+                <select id="review-rating">
+                    <option value="5">⭐⭐⭐⭐⭐ - Супер</option>
+                    <option value="4">⭐⭐⭐⭐ - Добре</option>
+                    <option value="3">⭐⭐⭐ - Нормально</option>
+                    <option value="2">⭐⭐ - Погано</option>
+                    <option value="1">⭐ -  Дуже погано</option>
+                </select>
+                <textarea id="review-msg" rows="3" placeholder="Текст відгуку..." required></textarea>
+                <button type="submit" class="btn full-width">Опублікувати</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2 class="section-title">Запис Онлайн</h2>
+        <div class="form-box">
+            <form onsubmit="createBooking(event)">
+                <input type="text" id="book-name" placeholder="Ваше Ім'я" required>
+                <input type="tel" id="book-phone" placeholder="Телефон" required>
+                
+                <div class="input-group">
+                    <label>Майстер</label>
+                    <select id="book-barber" required>
+                        <option value="">Оберіть...</option>
+                        <option value="Rostislav">Alex</option>
+                        <option value="Yurik">Dimas</option>
+                        <option value="Opap">Max</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Послуга</label>
+                    <select id="book-service" required>
+                        <option value="">Оберіть...</option>
+                        <option value="Стрижка">Стрижка (500₴)</option>
+                        <option value="Борода">Борода (350₴)</option>
+                        <option value="Комплекс">Комплекс (750₴)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Дата та час (10:00 - 22:00)</label>
+                    <input type="datetime-local" id="book-time" required>
+                </div>
+
+                <button type="submit" class="btn full-width">Підтвердити запис</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="about-section">
+        <h3 class="section-title">Про нас</h3>
+        
+        <div class="map-container-flex">
+            <div class="map-box">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2634.336113824855!2d25.0441774!3d48.525546!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDjCsDMxJzMyLjAiTiAyNcKwMDInMzkuMCJF!5e0!3m2!1suk!2sua!4v1700000000000" 
+                    loading="lazy">
+                </iframe>
+            </div>
+
+            <div class="map-info-v2">
+                <div class="info-row">
+                    <svg class="yellow-svg" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                    <span>м. Коломия, вул. Люба</span>
+                </div>
+
+                <div class="info-row">
+                    <svg class="yellow-svg" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    <a href="tel:+380688166023" class="contact-link">+38 (068) 816-60-23</a>
+                </div>
+                
+                <div class="social-icons-row">
+                    <a href="https://www.instagram.com/m.chobaniuk_/" target="_blank" class="social-icon-circle">
+                        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849s-.011 3.585-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.849-.07c-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849s.012-3.584.07-4.849c.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.196 4.354 2.617 6.78 6.979 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.354-.196 6.78-2.617 6.98-6.979.058-1.28.072-1.689.072-4.948s-.014-3.667-.072-4.947c-.196-4.354-2.617-6.78-6.98-6.98-1.281-.058-1.689-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                    <a href="https://t.me/+zQHGS0o_Cp45MjQy" target="_blank" class="social-icon-circle">
+                        <svg viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.891 8.146l-2.003 9.464c-.149.659-.541.823-1.091.515l-3.051-2.249-1.472 1.417c-.163.163-.3.298-.614.298l.219-3.107 5.654-5.107c.246-.219-.053-.341-.379-.125l-6.988 4.4c-.66.213-1.278-.014-1.503-.314l-2.522-.789c-.548-.17-.558-.548.114-.81l9.848-3.797c.459-.167.859.106.728.803z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer style="padding: 30px 0; background: #000; text-align: center; border-top: 1px solid #222;">
+        <p style="color:#666; font-size:12px;">© 2026 BarberStyle Pro System | Всі права захищені</p>
+    </footer>
+</div>
+
+<div id="admin-view" class="admin-panel" style="display:none;">
+    <div class="admin-nav">
+        <h3 style="color:var(--primary);">ADMIN <span style="color:white; font-size:14px;">PRO</span></h3>
+        <div class="nav-links">
+            <button class="tab-btn active" onclick="switchTab('dashboard', this)">Головна</button>
+            <button class="tab-btn" onclick="switchTab('bookings', this)">Записи</button>
+            <button class="tab-btn" onclick="switchTab('reviews', this)">Відгуки</button>
+        </div>
+        <button class="btn sm-btn logout-btn" onclick="logout()">Вихід</button>
+    </div>
+
+    <div class="admin-content">
+        <div id="tab-dashboard">
+            <h4>Статистика</h4>
+            <div class="stats-grid">
+                <div class="stat-card"><h3>Зароблено</h3><p id="total-revenue">0 ₴</p></div>
+                <div class="stat-card"><h3>Клієнтів</h3><p id="total-clients">0</p></div>
+                <div class="stat-card"><h3>Топ Барбер</h3><p id="top-barber">-</p></div>
+            </div>
+            <div class="chart-container"><canvas id="barberChart"></canvas></div>
+        </div>
+
+        <div id="tab-bookings" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h4>Журнал записів</h4>
+                <input type="text" id="search-input" placeholder="Пошук..." onkeyup="filterBookings()">
+            </div>
+            <div class="table-responsive">
+                <table id="booking-table">
+                    <thead>
+                        <tr>
+                            <th>Дата</th><th>Час</th><th>Клієнт</th><th>Телефон</th><th>Майстер</th><th>Послуга</th><th>Статус</th><th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booking-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-reviews" style="display:none;">
+            <h4>Управління відгуками</h4>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Ім'я</th><th>Оцінка</th><th>Текст</th><th>Дії</th></tr></thead>
+                    <tbody id="admin-reviews-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
