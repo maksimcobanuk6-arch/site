@@ -45,10 +45,29 @@
 
 <header>
     <div class="logo" onclick="goHome()">
+        <img src="logo.png" alt="Logo" class="header-avatar"> 
         <i class="fas fa-cut"></i> 
         BARBERSTYLE
     </div>
-    </header>
+    
+    <div class="menu-toggle" onclick="toggleMenu()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <nav>
+        <ul id="nav-list">
+            <li><a href="#services" onclick="toggleMenu()">Послуги</a></li>
+            <li><a href="#catalog" onclick="toggleMenu()">Каталог</a></li>
+            <li><a href="#team" onclick="toggleMenu()">Команда</a></li>
+            <li><a href="#reviews" onclick="toggleMenu()">Відгуки</a></li>
+            <li><a href="#contact" onclick="toggleMenu()">Запис</a></li>
+            <li>
+                <button class="admin-trigger" onclick="toggleModal('login-modal', true)">
+                    <i class="fas fa-user-lock"></i> Staff
+                </button>
+            </li>
+        </ul>
+    </nav>
 </header>
 
 <div id="client-view">
@@ -291,6 +310,7 @@
 
 </body>
 </html>
+
 
 
 
