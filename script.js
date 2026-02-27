@@ -192,19 +192,30 @@ function deleteReview(dbId) {
 /* --- ADMIN PANEL LOGIC --- */
 /* --- ADMIN PANEL LOGIC --- */
 function login() {
-    const pass = document.getElementById('admin-pass').value;
-    if(pass === 'admin') {
+    const passInput = document.getElementById('admin-pass');
+    const errorMsg = document.getElementById('login-error');
+    const pass = passInput.value;
+
+    if(pass === 'admin') { // Твій пароль
+        errorMsg.style.display = 'none';
         toggleModal('login-modal', false);
         
-        // Беремо чисту адресу сайту і додаємо #admin
-        const baseUrl = window.location.href.split('#')[0].split('?')[0];
-        
-        // Відкриваємо в новій вкладці!
-        window.open(baseUrl + '#admin', '_blank');
-        
-        document.getElementById('admin-pass').value = '';
+        // Перехід в адмінку
+        window.location.hash = 'admin';
+        window.location.reload();
     } else {
-        showToast('Невірний пароль', 'error');
+        // Якщо пароль невірний:
+        errorMsg.innerText = '❌ Невірний код доступу!';
+        errorMsg.style.display = 'block';
+        
+        // Робимо поле вводу червоним на секунду
+        passInput.style.borderColor = '#ff4d4d';
+        setTimeout(() => {
+            passInput.style.borderColor = 'rgba(212, 175, 55, 0.5)';
+        }, 1000);
+        
+        // Очищаємо поле
+        passInput.value = '';
     }
 }
 
@@ -325,4 +336,5 @@ function changeStatus(dbId, newStatus) {
 function filterBookings() {
     const text = document.getElementById('search-input').value;
     renderBookingsTable(text);
+
 }
