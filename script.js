@@ -227,19 +227,25 @@ function logout() {
 }
 
 function switchTab(tabId, btn) {
-    // 1. Примусово ховаємо всі три вкладки
+    // 1. Ховаємо всі вкладки
     document.getElementById('tab-dashboard').style.display = 'none';
     document.getElementById('tab-bookings').style.display = 'none';
     document.getElementById('tab-reviews').style.display = 'none';
-    
-    // 2. Показуємо тільки ту, на яку натиснули
-    document.getElementById('tab-' + tabId).style.display = 'block';
-    
-    // 3. Змінюємо підсвітку активної кнопки в меню
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-}
 
+    // 2. Знімаємо активний клас з усіх кнопок
+    document.querySelectorAll('.admin-nav .tab-btn').forEach(b => b.classList.remove('active'));
+
+    // 3. Показуємо потрібну вкладку і робимо кнопку активною
+    document.getElementById('tab-' + tabId).style.display = 'block';
+    btn.classList.add('active');
+
+    // 4. НАЙГОЛОВНІШЕ: Завантажуємо дані для конкретної вкладки!
+    if (tabId === 'reviews') {
+        loadAdminReviews(); // Запускаємо пошук відгуків!
+    } else if (tabId === 'bookings') {
+        // тут потім буде завантаження записів
+    }
+}
 /* --- DASHBOARD & ANALYTICS --- */
 let chartInstance = null;
 
@@ -393,5 +399,6 @@ async function renderReviews() {
                              .get();
     // ... решта твого коду для малювання карток ...
 }
+
 
 
