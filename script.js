@@ -335,4 +335,30 @@ function filterBookings() {
     renderBookingsTable(text);
 
 }
+async function loadAdminReviews() {
+    const tbody = document.getElementById('admin-reviews-body');
+    tbody.innerHTML = '';
+    
+    const snapshot = await db.collection('reviews').where('status', '==', 'pending').get();
+    snapshot.forEach(doc => {
+        const r = doc.data();
+        tbody.innerHTML += `
+            <tr>
+                <td>${r.name}</td>
+                <td>${r.rating}⭐</td>
+                <td>${r.text}</td>
+                <td>
+                    <button class="btn sm-btn" style="background:green" onclick="approveReview('${doc.id}')">✅</button>
+                    <button class="btn sm-btn" style="background:red" onclick="deleteReview('${doc.id}')">🗑️</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+async function approveReview(id) {
+    await db.collection('reviews').doc(id).update({ status: 'approved' });
+    loadAdminReviews(); // Оновити список
+    alert('Відгук опубліковано!');
+}
 
