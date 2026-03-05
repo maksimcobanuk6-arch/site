@@ -384,5 +384,14 @@ async function approveReview(id) {
         alert('Помилка при ододренні: ' + error.message);
     }
 }
+// Зміни в функції, яка малює відгуки для клієнтів
+async function renderReviews() {
+    const container = document.getElementById('reviews-container');
+    // Додаємо фільтр .where('status', '==', 'approved')
+    const snapshot = await db.collection('reviews')
+                             .where('status', '==', 'approved')
+                             .get();
+    // ... решта твого коду для малювання карток ...
+}
 
 
