@@ -356,20 +356,19 @@ function filterBookings() {
 }
 async function loadAdminReviews() {
     const tbody = document.getElementById('admin-reviews-body');
-    if (!tbody) return; // Перевірка, чи ми в адмінці
+    if (!tbody) return;
     
-    tbody.innerHTML = '<tr><td colspan="4">Завантаження...</td></tr>';
-    
+    console.log("🔍 Адмінка: Шукаю відгуки зі статусом 'pending'...");
+
     try {
-        // Отримуємо ТІЛЬКИ ті відгуки, які мають статус "pending" (очікують)
-        const snapshot = await db.collection('reviews')
-                                 .where('status', '==', 'pending')
-                                 .get();
+        const snapshot = await db.collection('reviews').where('status', '==', 'pending').get();
         
-        tbody.innerHTML = ''; // Очищуємо перед виводом
-        
+        console.log(`📊 Адмінка: Знайдено відгуків: ${snapshot.size}`);
+
+        tbody.innerHTML = ''; // Очищаємо таблицю
+
         if (snapshot.empty) {
-            tbody.innerHTML = '<tr><td colspan="4">Нових відгуків немає 😎</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Нових відгуків немає 😎</td></tr>';
             return;
         }
 
@@ -379,17 +378,16 @@ async function loadAdminReviews() {
                 <tr>
                     <td>${r.name}</td>
                     <td>${r.rating} ⭐</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.text}</td>
+                    <td>${r.text}</td>
                     <td>
-                        <button class="btn sm-btn" style="background:#2ecc71" onclick="approveReview('${doc.id}')">✅ Одобрити</button>
-                        <button class="btn sm-btn" style="background:#e74c3c" onclick="deleteReview('${doc.id}')">🗑️ Видалити</button>
+                        <button class="btn sm-btn" style="background:#2ecc71" onclick="approveReview('${doc.id}')">✅</button>
+                        <button class="btn sm-btn" style="background:#e74c3c" onclick="deleteReview('${doc.id}')">🗑</button>
                     </td>
                 </tr>
             `;
         });
     } catch (error) {
-        console.error("Помилка завантаження відгуків:", error);
-        tbody.innerHTML = '<tr><td colspan="4">Помилка доступу до бази</td></tr>';
+        console.error("❌ Адмінка: Помилка завантаження відгуків:", error);
     }
 }
 async function approveReview(id) {
@@ -412,6 +410,7 @@ async function renderReviews() {
                              .get();
     // ... решта твого коду для малювання карток ...
 }
+
 
 
 
