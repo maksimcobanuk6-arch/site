@@ -337,28 +337,52 @@ function filterBookings() {
 }
 async function loadAdminReviews() {
     const tbody = document.getElementById('admin-reviews-body');
-    tbody.innerHTML = '';
+    if (!tbody) return; // Перевірка, чи ми в адмінці
     
-    const snapshot = await db.collection('reviews').where('status', '==', 'pending').get();
-    snapshot.forEach(doc => {
-        const r = doc.data();
-        tbody.innerHTML += `
-            <tr>
-                <td>${r.name}</td>
-                <td>${r.rating}⭐</td>
-                <td>${r.text}</td>
-                <td>
-                    <button class="btn sm-btn" style="background:green" onclick="approveReview('${doc.id}')">✅</button>
-                    <button class="btn sm-btn" style="background:red" onclick="deleteReview('${doc.id}')">🗑️</button>
-                </td>
-            </tr>
-        `;
-    });
+    tbody.innerHTML = '<tr><td colspan="4">Завантаження...</td></tr>';
+    
+    try {
+        // Отримуємо ТІЛЬКИ ті відгуки, які мають статус "pending" (очікують)
+        const snapshot = await db.collection('reviews')
+                                 .where('status', '==', 'pending')
+                                 .get();
+        
+        tbody.innerHTML = ''; // Очищуємо перед виводом
+        
+        if (snapshot.empty) {
+            tbody.innerHTML = '<tr><td colspan="4">Нових відгуків немає 😎</td></tr>';
+            return;
+        }
+
+        snapshot.forEach(doc => {
+            const r = doc.data();
+            tbody.innerHTML += `
+                <tr>
+                    <td>${r.name}</td>
+                    <td>${r.rating} ⭐</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.text}</td>
+                    <td>
+                        <button class="btn sm-btn" style="background:#2ecc71" onclick="approveReview('${doc.id}')">✅ Одобрити</button>
+                        <button class="btn sm-btn" style="background:#e74c3c" onclick="deleteReview('${doc.id}')">🗑️ Видалити</button>
+                    </td>
+                </tr>
+            `;
+        });
+    } catch (error) {
+        console.error("Помилка завантаження відгуків:", error);
+        tbody.innerHTML = '<tr><td colspan="4">Помилка доступу до бази</td></tr>';
+    }
+}
+async function approveReview(id) {
+    try {
+        await db.collection('reviews').doc(id).update({
+            status: 'approved'
+        });
+        showToast('Відгук опубліковано!', 'success');
+        loadAdminReviews(); // Перезавантажуємо таблицю в адмінці
+    } catch (error) {
+        alert('Помилка при ододренні: ' + error.message);
+    }
 }
 
-async function approveReview(id) {
-    await db.collection('reviews').doc(id).update({ status: 'approved' });
-    loadAdminReviews(); // Оновити список
-    alert('Відгук опубліковано!');
-}
 
