@@ -1,4 +1,3 @@
-console.log("🚀 Скрипт успішно підключено і працює!");
 // --- FIREBASE SETUP ---
 const firebaseConfig = {
     apiKey: "AIzaSyD-taJI7mZNk_ooflprftRU-BIsI8VIEP4",
@@ -18,20 +17,19 @@ const PRICES = {
     'Комплекс': 750
 };
 
-// Тепер це порожні масиви, які заповнюватимуться з інтернету
 let bookings = [];
 let reviews = [];
 
 // 1. Слухаємо відгуки з бази (в реальному часі)
-db.collection("reviews").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+db.collection("reviews").orderBy("date", "desc").onSnapshot((snapshot) => {
     reviews = [];
     snapshot.forEach((doc) => {
         reviews.push({ dbId: doc.id, ...doc.data() }); 
     });
-    renderReviews();
+    renderReviews(); // Оновлюємо відгуки на сайті
 });
 
-// 2. Слухаємо записи клієнтів з бази (в реальному часі)
+// 2. Слухаємо записи клієнтів з бази
 db.collection("bookings").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
     bookings = [];
     snapshot.forEach((doc) => {
@@ -40,19 +38,20 @@ db.collection("bookings").orderBy("createdAt", "desc").onSnapshot((snapshot) => 
     renderBookingsTable();
     updateDashboard();
 });
+
 /* --- INIT --- */
 document.addEventListener('DOMContentLoaded', () => {
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     document.getElementById('book-time').min = now.toISOString().slice(0,16);
 
-    // НАДІЙНА ПЕРЕВІРКА: Шукаємо #admin в кінці адреси
     if (window.location.hash === '#admin') {
         document.querySelector('header').style.display = 'none';
         document.getElementById('client-view').style.display = 'none';
         document.getElementById('admin-view').style.display = 'block';
     }
 });
+
 /* --- UTILS --- */
 function showToast(msg, type = 'success') {
     const container = document.getElementById('toast-container');
@@ -116,7 +115,6 @@ function createBooking(e) {
         return;
     }
 
-    // Відправляємо запис у Firebase
     db.collection("bookings").add({
         name, phone, barber, service,
         fullDate: timeVal,
@@ -133,134 +131,86 @@ function createBooking(e) {
     });
 }
 
-/* --- REVIEWS LOGIC --- */
+/* --- REVIEWS LOGIC (САЙТ) --- */
 function renderReviews() {
     const container = document.getElementById('reviews-container');
-    const adminBody = document.getElementById('admin-reviews-body');
+    if(!container) return;
     
-    if(container) container.innerHTML = '';
-    if(adminBody) adminBody.innerHTML = '';
+    container.innerHTML = '';
 
-    reviews.forEach((r) => {
-        if(container) {
-            const stars = '⭐'.repeat(r.rating);
-            const card = document.createElement('div');
-            card.className = 'card review-card';
-            card.innerHTML = `<p style="color:var(--primary)">${stars}</p><h3>${r.name}</h3><p>"${r.text}"</p>`;
-            container.appendChild(card);
-        }
+    // Фільтруємо: показуємо тільки одобрені, АБО старі відгуки (у яких ще не було поля status)
+    const approvedReviews = reviews.filter(r => r.status === 'approved' || !r.status);
 
-        if(adminBody) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${r.name}</td>
-                <td>${r.rating}/5</td>
-                <td>${r.text}</td>
-                <td><i class="fas fa-trash action-icon icon-del" onclick="deleteReview('${r.dbId}')"></i></td>
-            `;
-            adminBody.appendChild(row);
-        }
+    approvedReviews.forEach((r) => {
+        const stars = '⭐'.repeat(Number(r.rating) || 5);
+        const card = document.createElement('div');
+        card.className = 'card review-card';
+        card.innerHTML = `<p style="color:var(--primary)">${stars}</p><h3>${r.name}</h3><p>"${r.text}"</p>`;
+        container.appendChild(card);
     });
 }
 
 async function addReview(event) {
-    // 1. ЗУПИНЯЄМО перезавантаження сторінки (це найчастіша помилка)
-    event.preventDefault(); 
-
-    const name = document.getElementById('review-name').value;
-    const rating = document.getElementById('review-rating').value;
-    const text = document.getElementById('review-msg').value;
-
-    console.log("👉 Спроба відправити відгук:", name, text);
-
+    event.preventDefault();
+    const reviewData = {
+        name: document.getElementById('review-name').value,
+        rating: document.getElementById('review-rating').value,
+        text: document.getElementById('review-msg').value,
+        status: "pending", // Ставимо статус "очікує"
+        date: new Date().toISOString()
+    };
+    
     try {
-        // 2. Відправляємо в базу
-        await db.collection('reviews').add({
-            name: name,
-            rating: rating,
-            text: text,
-            status: "pending", // Саме це шукає адмінка
-            date: new Date().toISOString()
-        });
-        
-        console.log("✅ Відгук успішно записано у Firebase!");
-        alert('Відгук надіслано на перевірку адміну!');
-        event.target.reset(); // Очищаємо форму
-
-    } catch (error) {
-        console.error("❌ Помилка збереження відгуку:", error);
-    }
-}
-function deleteReview(dbId) {
-    if(confirm('Видалити цей відгук?')) {
-        db.collection("reviews").doc(dbId).delete().then(() => {
-            showToast('Відгук видалено', 'error');
-        });
+        await db.collection('reviews').add(reviewData);
+        showToast('Відгук надіслано на перевірку адміну!');
+        event.target.reset();
+    } catch(err) {
+        showToast('Помилка: ' + err.message, 'error');
     }
 }
 
-/* --- ADMIN PANEL LOGIC --- */
-/* --- ADMIN PANEL LOGIC --- */
 /* --- ADMIN PANEL LOGIC --- */
 function login() {
     const passInput = document.getElementById('admin-pass');
     const errorMsg = document.getElementById('login-error');
     const pass = passInput.value;
 
-    if(pass === 'admin') { // Твій пароль
+    if(pass === 'admin') { 
         errorMsg.style.display = 'none';
         toggleModal('login-modal', false);
-        
-        // Перехід в адмінку
         window.location.hash = 'admin';
         window.location.reload();
     } else {
-        // Якщо пароль невірний:
         errorMsg.innerText = '❌ Невірний код доступу!';
         errorMsg.style.display = 'block';
-        
-        // Робимо поле вводу червоним на секунду
         passInput.style.borderColor = '#ff4d4d';
-        setTimeout(() => {
-            passInput.style.borderColor = 'rgba(212, 175, 55, 0.5)';
-        }, 1000);
-        
-        // Очищаємо поле
+        setTimeout(() => passInput.style.borderColor = 'rgba(212, 175, 55, 0.5)', 1000);
         passInput.value = '';
     }
 }
 
 function logout() {
-    // Спочатку намагаємося закрити вкладку
-    window.close();
-    
-    // Якщо браузер забороняє автоматично закривати вкладки, 
-    // просто стираємо #admin і перезавантажуємо сторінку:
     window.location.hash = '';
     window.location.reload();
 }
 
 function switchTab(tabId, btn) {
-    // 1. Ховаємо всі вкладки
     document.getElementById('tab-dashboard').style.display = 'none';
     document.getElementById('tab-bookings').style.display = 'none';
     document.getElementById('tab-reviews').style.display = 'none';
-
-    // 2. Знімаємо активний клас з усіх кнопок
-    document.querySelectorAll('.admin-nav .tab-btn').forEach(b => b.classList.remove('active'));
-
-    // 3. Показуємо потрібну вкладку і робимо кнопку активною
+    
     document.getElementById('tab-' + tabId).style.display = 'block';
+    
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
-    // 4. НАЙГОЛОВНІШЕ: Завантажуємо дані для конкретної вкладки!
+    // ОСЬ ТУТ БУЛА ПОМИЛКА: додаємо завантаження відгуків при кліку на вкладку!
     if (tabId === 'reviews') {
-        loadAdminReviews(); // Запускаємо пошук відгуків!
-    } else if (tabId === 'bookings') {
-        // тут потім буде завантаження записів
+        loadAdminReviews();
     }
 }
-/* --- DASHBOARD & ANALYTICS --- */
+
+/* --- DASHBOARD --- */
 let chartInstance = null;
 
 function updateDashboard() {
@@ -297,9 +247,7 @@ function updateDashboard() {
         },
         options: {
             responsive: true,
-            plugins: {
-                legend: { labels: { color: 'white' } }
-            },
+            plugins: { legend: { labels: { color: 'white' } } },
             scales: {
                 y: { beginAtZero: true, ticks: { color: 'white' }, grid: { color: '#333' } },
                 x: { ticks: { color: 'white' }, grid: { display: false } }
@@ -340,34 +288,27 @@ function renderBookingsTable(filterText = '') {
 }
 
 function changeStatus(dbId, newStatus) {
-    // Змінюємо статус в базі даних
-    db.collection("bookings").doc(dbId).update({
-        status: newStatus
-    }).then(() => {
-        showToast(`Статус змінено на: ${newStatus}`);
-    }).catch(err => {
-        showToast('Помилка: ' + err.message, 'error');
-    });
+    db.collection("bookings").doc(dbId).update({ status: newStatus })
+      .then(() => showToast(`Статус змінено на: ${newStatus}`))
+      .catch(err => showToast('Помилка: ' + err.message, 'error'));
 }
 
 function filterBookings() {
     const text = document.getElementById('search-input').value;
     renderBookingsTable(text);
-
 }
+
+/* --- ADMIN REVIEWS LOGIC --- */
 async function loadAdminReviews() {
     const tbody = document.getElementById('admin-reviews-body');
-    if (!tbody) return;
+    if (!tbody) return; 
     
-    console.log("🔍 Адмінка: Шукаю відгуки зі статусом 'pending'...");
-
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Завантаження...</td></tr>';
+    
     try {
         const snapshot = await db.collection('reviews').where('status', '==', 'pending').get();
+        tbody.innerHTML = ''; 
         
-        console.log(`📊 Адмінка: Знайдено відгуків: ${snapshot.size}`);
-
-        tbody.innerHTML = ''; // Очищаємо таблицю
-
         if (snapshot.empty) {
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Нових відгуків немає 😎</td></tr>';
             return;
@@ -379,41 +320,35 @@ async function loadAdminReviews() {
                 <tr>
                     <td>${r.name}</td>
                     <td>${r.rating} ⭐</td>
-                    <td>${r.text}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.text}</td>
                     <td>
                         <button class="btn sm-btn" style="background:#2ecc71" onclick="approveReview('${doc.id}')">✅</button>
-                        <button class="btn sm-btn" style="background:#e74c3c" onclick="deleteReview('${doc.id}')">🗑</button>
+                        <button class="btn sm-btn" style="background:#e74c3c" onclick="deleteReview('${doc.id}')">🗑️</button>
                     </td>
                 </tr>
             `;
         });
     } catch (error) {
-        console.error("❌ Адмінка: Помилка завантаження відгуків:", error);
+        console.error("Помилка:", error);
+        tbody.innerHTML = '<tr><td colspan="4">Помилка доступу до бази</td></tr>';
     }
 }
+
 async function approveReview(id) {
     try {
-        await db.collection('reviews').doc(id).update({
-            status: 'approved'
-        });
-        showToast('Відгук опубліковано!', 'success');
-        loadAdminReviews(); // Перезавантажуємо таблицю в адмінці
+        await db.collection('reviews').doc(id).update({ status: 'approved' });
+        showToast('Відгук опубліковано!');
+        loadAdminReviews(); // Оновлюємо таблицю
     } catch (error) {
-        alert('Помилка при ододренні: ' + error.message);
+        alert('Помилка: ' + error.message);
     }
 }
-// Зміни в функції, яка малює відгуки для клієнтів
-async function renderReviews() {
-    const container = document.getElementById('reviews-container');
-    // Додаємо фільтр .where('status', '==', 'approved')
-    const snapshot = await db.collection('reviews')
-                             .where('status', '==', 'approved')
-                             .get();
-    // ... решта твого коду для малювання карток ...
+
+function deleteReview(dbId) {
+    if(confirm('Видалити цей відгук?')) {
+        db.collection("reviews").doc(dbId).delete().then(() => {
+            showToast('Відгук видалено', 'error');
+            loadAdminReviews(); // Оновлюємо таблицю в адмінці
+        });
+    }
 }
-
-
-
-
-
-
