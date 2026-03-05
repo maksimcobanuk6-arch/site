@@ -1,3 +1,4 @@
+console.log("🚀 Скрипт успішно підключено і працює!");
 // --- FIREBASE SETUP ---
 const firebaseConfig = {
     apiKey: "AIzaSyD-taJI7mZNk_ooflprftRU-BIsI8VIEP4",
@@ -410,6 +411,7 @@ async function renderReviews() {
                              .get();
     // ... решта твого коду для малювання карток ...
 }
+
 
 
 
