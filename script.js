@@ -163,20 +163,33 @@ function renderReviews() {
 }
 
 async function addReview(event) {
-    event.preventDefault();
-    const reviewData = {
-        name: document.getElementById('review-name').value,
-        rating: document.getElementById('review-rating').value,
-        text: document.getElementById('review-msg').value,
-        status: "pending", // Новий відгук чекає перевірки
-        date: new Date().toISOString()
-    };
-    
-    await db.collection('reviews').add(reviewData);
-    alert('Відгук надіслано на модерацію!');
-    event.target.reset();
-}
+    // 1. ЗУПИНЯЄМО перезавантаження сторінки (це найчастіша помилка)
+    event.preventDefault(); 
 
+    const name = document.getElementById('review-name').value;
+    const rating = document.getElementById('review-rating').value;
+    const text = document.getElementById('review-msg').value;
+
+    console.log("👉 Спроба відправити відгук:", name, text);
+
+    try {
+        // 2. Відправляємо в базу
+        await db.collection('reviews').add({
+            name: name,
+            rating: rating,
+            text: text,
+            status: "pending", // Саме це шукає адмінка
+            date: new Date().toISOString()
+        });
+        
+        console.log("✅ Відгук успішно записано у Firebase!");
+        alert('Відгук надіслано на перевірку адміну!');
+        event.target.reset(); // Очищаємо форму
+
+    } catch (error) {
+        console.error("❌ Помилка збереження відгуку:", error);
+    }
+}
 function deleteReview(dbId) {
     if(confirm('Видалити цей відгук?')) {
         db.collection("reviews").doc(dbId).delete().then(() => {
@@ -399,6 +412,7 @@ async function renderReviews() {
                              .get();
     // ... решта твого коду для малювання карток ...
 }
+
 
 
 
