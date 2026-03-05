@@ -162,22 +162,19 @@ function renderReviews() {
     });
 }
 
-function addReview(e) {
-    e.preventDefault();
-    const name = document.getElementById('review-name').value;
-    const rating = document.getElementById('review-rating').value;
-    const msg = document.getElementById('review-msg').value;
-
-    // Відправляємо відгук у Firebase
-    db.collection("reviews").add({
-        name: name,
-        rating: Number(rating),
-        text: msg,
-        createdAt: Date.now()
-    }).then(() => {
-        showToast('Відгук додано!');
-        e.target.reset();
-    });
+async function addReview(event) {
+    event.preventDefault();
+    const reviewData = {
+        name: document.getElementById('review-name').value,
+        rating: document.getElementById('review-rating').value,
+        text: document.getElementById('review-msg').value,
+        status: "pending", // Новий відгук чекає перевірки
+        date: new Date().toISOString()
+    };
+    
+    await db.collection('reviews').add(reviewData);
+    alert('Відгук надіслано на модерацію!');
+    event.target.reset();
 }
 
 function deleteReview(dbId) {
@@ -338,3 +335,4 @@ function filterBookings() {
     renderBookingsTable(text);
 
 }
+
